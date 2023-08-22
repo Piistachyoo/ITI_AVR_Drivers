@@ -25,6 +25,8 @@ typedef enum{
 	RET_NOT_OK = 1
 }Std_Returntype;
 
+#ifndef NULL
 #define NULL	0
+#endif
 
 #endif /* SERVICES_STD_LIB_H_ */
