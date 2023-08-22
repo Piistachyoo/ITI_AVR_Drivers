@@ -8,77 +8,14 @@
 /*************************************************************************/
 
 #include "../HAL/LCD/LCD_interface.h"
+#include "../HAL/KEYPAD/keypad_interface.h"
 #include "util/delay.h"
 GPIO_Typedef *mygpio = GPIOC;
 
-uint8 o[] = {
-		  0x00,
-		  0x00,
-		  0x07,
-		  0x04,
-		  0x1F,
-		  0x00,
-		  0x00,
-		  0x00
-		};
-
-uint8 meem[] = {
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x1F,
-		  0x0A,
-		  0x0E,
-		  0x00
-		};
-
-uint8 r[] = {
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x07,
-		  0x04,
-		  0x08,
-		  0x10
-		};
-
-uint8 meem_new[] = {
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x00,
-		  0x1F,
-		  0x05,
-		  0x07,
-		  0x00
-		};
-
-uint8 h[] = {
-		  0x00,
-		  0x00,
-		  0x0C,
-		  0x02,
-		  0x1F,
-		  0x00,
-		  0x00,
-		  0x00
-		};
-
-uint8 d[] = {
-		  0x00,
-		  0x00,
-		  0x04,
-		  0x04,
-		  0x1F,
-		  0x00,
-		  0x00,
-		  0x00
-		};
 
 
 int main(void){
+	uint8 pressed_key;
 	LCD_t LCD2;
 	LCD2.mode = LCD_4BIT;
 	LCD2.Display_Mode = LCD_DISPLAY_ON_UNDERLINE_OFF_CURSOR_OFF;
@@ -112,30 +49,23 @@ int main(void){
 	LCD2.D_PINS[3].pin = GPIO_PIN_6;
 	LCD2.D_PINS[3].default_state = GPIO_STATE_LOW;
 	LCD_Init(&LCD2);
-//	LCD_Send_String(&LCD2, "OMAR YAMANY");
-	LCD_Save_Special_Character(&LCD2, 0, o);
-	LCD_Save_Special_Character(&LCD2, 1, meem);
-	LCD_Save_Special_Character(&LCD2, 2, r);
-	LCD_Save_Special_Character(&LCD2, 3, meem_new);
-	LCD_Save_Special_Character(&LCD2, 4, h);
-	LCD_Save_Special_Character(&LCD2, 5, d);
 
-	LCD_Send_Char_Pos(&LCD2, 0, LCD_FIRST_ROW, 16);
-	LCD_Send_Char_Pos(&LCD2, 1, LCD_FIRST_ROW, 15);
-	LCD_Send_Char_Pos(&LCD2, 2, LCD_FIRST_ROW, 14);
-	LCD_Send_Char_Pos(&LCD2, 3, LCD_FIRST_ROW, 13);
-	LCD_Send_Char_Pos(&LCD2, 4, LCD_FIRST_ROW, 12);
-	LCD_Send_Char_Pos(&LCD2, 1, LCD_FIRST_ROW, 11);
-	LCD_Send_Char_Pos(&LCD2, 5, LCD_FIRST_ROW, 10);
+	KPD_t KPD1;
+	for(uint8 i = 0; i < 4; i++){
+		KPD1.row[i].GPIOx = GPIOC;
+		KPD1.col[i].GPIOx = GPIOC;
+		KPD1.row[i].direction = GPIO_INPUT;
+		KPD1.col[i].direction = GPIO_OUTPUT;
+		KPD1.row[i].pin = i;
+		KPD1.col[i].pin = i+4;
+		KPD1.row[i].default_state = GPIO_STATE_HIGH;
+		KPD1.col[i].default_state = GPIO_STATE_HIGH;
+	}
+	keypad_init(&KPD1);
 	while(1){
-/*		for(int i = 0; i < 10; i++){
-			LCD_Shift_Display(&LCD2, LCD_SHIFT_RIGHT, 1);
-			_delay_ms(200);
-		}
-		for(int i = 0; i < 10; i++){
-			LCD_Shift_Display(&LCD2, LCD_SHIFT_LEFT, 1);
-			_delay_ms(200);
-		}*/
+		keypad_Get_Pressed_Key(&KPD1, &pressed_key);
+		if('F' != pressed_key)
+			LCD_Send_Char(&LCD2, pressed_key);
 	}
 	return 0;
 }
